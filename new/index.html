@@ -4,83 +4,223 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>Анкета для адресника</title>
+<title>Адресник — заказ</title>
 <style>
   * { box-sizing: border-box; }
-  body { margin: 0; background: #1b1b1b; color: #fff; font: 16px/1.45 "Segoe UI", Roboto, Arial, sans-serif; }
-  main { max-width: 560px; margin: 0 auto; padding: 22px 16px 60px; }
-  h1 { font-size: 24px; margin: 0 0 6px; }
-  p { color: #c9c9c9; margin: 6px 0 0; }
-  .card { background: #262626; border-radius: 12px; padding: 4px 16px 16px; margin-top: 16px; }
-  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .05em; color: #9a9a9a; margin: 16px 0 0; }
-  label { display: block; font-size: 14px; color: #c9c9c9; margin: 12px 0 4px; }
-  input[type=text], input[type=tel], input[type=email], select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #1b1b1b; color: #fff; font: inherit; }
-  input[type=file] { width: 100%; color: #c9c9c9; font: inherit; }
-  #pv { display: none; width: 100%; max-height: 260px; object-fit: cover; border-radius: 8px; margin-top: 10px; }
-  .ok { display: flex; gap: 10px; align-items: flex-start; margin-top: 18px; font-size: 14px; color: #c9c9c9; }
+  html, body { margin: 0; height: 100%; }
+  body { background: #f5f5f5; color: #1c1c1c; font: 16px/1.45 "Segoe UI", Roboto, Arial, sans-serif; }
+  .wrap { display: flex; flex-direction: column; min-height: 100%; }
+  #view { position: sticky; top: 0; z-index: 2; height: 44vh; min-height: 260px; background: #f5f5f5; touch-action: none; }
+  #view canvas { display: block; width: 100%; height: 100%; cursor: grab; }
+  #hint { position: absolute; left: 0; right: 0; bottom: 6px; text-align: center; font-size: 12px; color: #999; pointer-events: none; }
+  #side { padding: 4px 14px 60px; }
+  .card { background: #fff; border-radius: 10px; padding: 4px 18px 18px; margin-top: 14px; box-shadow: 0 1px 3px #0001; }
+  h1 { font-size: 22px; margin: 14px 4px 0; }
+  .lead { color: #666; margin: 4px 4px 0; font-size: 14px; }
+  h2 { font-size: 19px; font-weight: 600; margin: 14px 0 2px; }
+  label { display: block; font-size: 13px; color: #666; margin: 12px 0 4px; }
+  input[type=text], input[type=tel], input[type=email], select { width: 100%; padding: 11px 12px; border-radius: 8px; border: 1px solid #cfcfcb; background: #fff; color: inherit; font: inherit; }
+  input[type=file] { width: 100%; font: inherit; color: #666; }
+  #pv { display: none; width: 100%; max-height: 220px; object-fit: cover; border-radius: 8px; margin-top: 10px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { display: flex; align-items: center; gap: 7px; padding: 7px 11px; border: 1px solid #dcdcd8; border-radius: 4px; background: #fff; font: inherit; font-size: 14px; color: #1c1c1c; cursor: pointer; }
+  .chip i { width: 14px; height: 14px; border: 1px solid #0003; display: inline-block; }
+  .chip.on { border: 2px solid #19b13c; padding: 6px 10px; }
+  .chip:disabled { opacity: .35; cursor: not-allowed; }
+  .note { font-size: 13px; color: #777; margin-top: 8px; }
+  .ok { display: flex; gap: 10px; align-items: flex-start; margin: 18px 4px 0; font-size: 14px; color: #555; }
   .ok input { width: 22px; height: 22px; flex: none; margin-top: 1px; }
-  button, .btn { display: block; width: 100%; margin-top: 16px; padding: 16px; border: 0; border-radius: 40px; background: #ff3b3b; color: #fff; font: inherit; font-size: 17px;
-                 text-transform: uppercase; letter-spacing: .04em; text-align: center; text-decoration: none; cursor: pointer; }
-  .btn.ghost { background: #3a3a3a; }
-  #err { color: #ff8a84; margin-top: 12px; min-height: 1.4em; }
+  button.main, .btn { display: block; width: 100%; margin-top: 16px; padding: 15px; border: 0; border-radius: 40px; background: #ff3b3b; color: #fff; font: inherit; font-size: 17px;
+                      text-transform: uppercase; letter-spacing: .04em; text-align: center; text-decoration: none; cursor: pointer; }
+  .btn.ghost { background: #e4e4e0; color: #1c1c1c; }
+  #err { color: #c62a22; margin: 12px 4px 0; min-height: 1.4em; }
   #done { display: none; }
-  ol { color: #c9c9c9; padding-left: 20px; } li { margin: 6px 0; }
+  ol { color: #555; padding-left: 20px; } li { margin: 6px 0; }
+  @media (min-width: 900px) {
+    .wrap { flex-direction: row; }
+    #view { flex: 1; height: 100vh; }
+    #side { flex: 0 0 500px; height: 100vh; overflow-y: auto; padding: 8px 22px 60px; }
+  }
 </style>
 </head>
 <body>
-<main>
- <div id="form">
-  <h1>Анкета для адресника</h1>
-  <p>Заполните данные питомца и владельцев. В конце получится один файл — его нужно отправить Валере. Данные никуда не уходят, пока вы сами не отправите файл.</p>
+<div class="wrap">
+ <div id="view"><div id="hint">модель можно крутить · QR на картинке условный</div></div>
+ <div id="side">
+  <div id="form">
+   <h1>Адресник</h1>
+   <div class="lead">Заполните данные — они сразу появятся на модели. В конце получится один файл, его нужно отправить Валере.</div>
 
-  <div class="card">
-   <h2>Питомец</h2>
-   <label>Кличка *</label><input type="text" id="name" maxlength="24" autocomplete="off">
-   <label>Пол</label><select id="gender"><option value="f">она</option><option value="m">он</option></select>
-   <label>Фото * (лучше крупно морду)</label><input type="file" id="photo" accept="image/*"><img id="pv" alt="">
+   <div class="card">
+    <h2>Питомец</h2>
+    <label>Кличка *</label><input type="text" id="name" maxlength="24" autocomplete="off">
+    <label>Пол</label><select id="gender"><option value="f">она</option><option value="m">он</option></select>
+    <label>Фото для страницы * (лучше крупно морду)</label><input type="file" id="photo" accept="image/*"><img id="pv" alt="">
+   </div>
+
+   <div class="card">
+    <h2>Владельцы</h2>
+    <label>Владелец 1: как подписать (например «Мама Настя»)</label><input type="text" id="l0" maxlength="30">
+    <label>Телефон *</label><input type="tel" id="p0" placeholder="+7 900 000-00-00">
+    <label>Почта</label><input type="email" id="e0">
+    <label>Телеграм</label><input type="text" id="t0" placeholder="@name" autocapitalize="off">
+    <label style="margin-top:22px">Владелец 2 (если есть): как подписать</label><input type="text" id="l1" maxlength="30">
+    <label>Телефон</label><input type="tel" id="p1">
+    <label>Почта</label><input type="email" id="e1">
+    <label>Телеграм</label><input type="text" id="t1" autocapitalize="off">
+   </div>
+
+   <div class="card">
+    <h2>Цвет</h2>
+    <label>Цвет адресника (паяльная маска)</label><div class="chips" id="mask"></div>
+    <label>Цвет надписей (шелкография)</label><div class="chips" id="silk"></div>
+    <div class="note" id="cnote"></div>
+   </div>
+
+   <label class="ok"><input type="checkbox" id="agree"><span>Понимаю, что кличка, фото, телефоны, почта и телеграм будут на открытой странице в интернете — её увидит любой, кто отсканирует адресник или получит ссылку.</span></label>
+   <button class="main" id="go">Готово</button>
+   <div id="err"></div>
   </div>
 
-  <div class="card">
-   <h2>Владелец 1</h2>
-   <label>Как подписать (например «Мама Настя»)</label><input type="text" id="l0" maxlength="30">
-   <label>Телефон *</label><input type="tel" id="p0" placeholder="+7 900 000-00-00">
-   <label>Почта</label><input type="email" id="e0">
-   <label>Телеграм</label><input type="text" id="t0" placeholder="@name" autocapitalize="off">
+  <div id="done">
+   <h1>Анкета готова</h1>
+   <div class="lead">Остался один шаг — отправить файл <b id="fn"></b> Валере.</div>
+   <button class="main" id="share">Отправить файл</button>
+   <a class="btn ghost" id="dl">Скачать файл</a>
+   <ol>
+    <li>«Отправить файл» откроет список приложений — выберите Telegram и отправьте файл Валере: <a href="https://t.me/VZaharov_777">@VZaharov_777</a>.</li>
+    <li>Если кнопка не сработала — нажмите «Скачать файл» и отправьте его вручную.</li>
+   </ol>
+   <a class="btn ghost" id="back">Исправить данные</a>
   </div>
-
-  <div class="card">
-   <h2>Владелец 2 (если есть)</h2>
-   <label>Как подписать</label><input type="text" id="l1" maxlength="30">
-   <label>Телефон</label><input type="tel" id="p1">
-   <label>Почта</label><input type="email" id="e1">
-   <label>Телеграм</label><input type="text" id="t1" autocapitalize="off">
-  </div>
-
-  <label class="ok"><input type="checkbox" id="agree"><span>Понимаю, что кличка, фото, телефоны, почта и телеграм будут на открытой странице в интернете — её увидит любой, кто отсканирует адресник или получит ссылку.</span></label>
-  <button id="go">Готово</button>
-  <div id="err"></div>
  </div>
+</div>
 
- <div id="done">
-  <h1>Анкета готова</h1>
-  <p>Остался один шаг — отправить файл <b id="fn"></b> Валере.</p>
-  <button id="share">Отправить файл</button>
-  <a class="btn ghost" id="dl">Скачать файл</a>
-  <ol>
-   <li>«Отправить файл» откроет список приложений — выберите Telegram и отправьте файл Валере: <a href="https://t.me/VZaharov_777" style="color:#4aa3e8">@VZaharov_777</a>.</li>
-   <li>Если кнопка не сработала — нажмите «Скачать файл» и отправьте его вручную.</li>
-  </ol>
-  <a class="btn ghost" id="back">Исправить данные</a>
- </div>
-</main>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script>
 const $ = id => document.getElementById(id);
 const KEY = 'adresnik-draft';
 const ids = ['name', 'gender', 'l0', 'p0', 'e0', 't0', 'l1', 'p1', 'e1', 't1'];
-let photo = '', file = null;
-try { const d = JSON.parse(localStorage.getItem(KEY) || '{}'); ids.forEach(i => { if (d[i]) $(i).value = d[i]; }); } catch (e) {}
-ids.forEach(i => $(i).addEventListener('input', () => { try { localStorage.setItem(KEY, JSON.stringify(Object.fromEntries(ids.map(k => [k, $(k).value])))); } catch (e) {} }));
+// the colours a board maker offers; names go to the order as they are
+const MASKS = { 'Green': '#1f7a4d', 'White': '#eeeeea', 'Blue': '#1b4fa8', 'Black': '#141414', 'Yellow': '#e0b21c', 'Red': '#b3202a',
+                'Matte Black': '#222222', 'Matte Green': '#2f6f4c', 'Purple': '#5b2a86' };
+const SILKS = { 'White': '#f7f7f7', 'Black': '#101010' };
+// pairs with no contrast: the QR and the phone numbers would not be readable
+const BAD = { 'White': ['White', 'Yellow'], 'Black': ['Black', 'Matte Black'] };
+let photo = '', file = null, mask = 'Black', silk = 'White';
 
+try { const d = JSON.parse(localStorage.getItem(KEY) || '{}'); ids.forEach(i => { if (d[i]) $(i).value = d[i]; });
+      if (MASKS[d.mask]) mask = d.mask; if (SILKS[d.silk] && !BAD[d.silk].includes(mask)) silk = d.silk; } catch (e) {}
+function save() { try { const d = Object.fromEntries(ids.map(k => [k, $(k).value])); d.mask = mask; d.silk = silk; localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {} }
+
+function chips() {
+  for (const [box, set, cur] of [['mask', MASKS, mask], ['silk', SILKS, silk]]) {
+    $(box).innerHTML = '';
+    for (const n in set) {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'chip' + (n === cur ? ' on' : '');
+      b.innerHTML = '<i style="background:' + set[n] + '"></i>'; b.append(n);
+      if (box === 'silk') b.disabled = BAD[n].includes(mask);
+      b.onclick = () => { if (box === 'mask') { mask = n; if (BAD[silk].includes(mask)) silk = silk === 'White' ? 'Black' : 'White'; } else silk = n; chips(); save(); draw(); };
+      $(box).append(b);
+    }
+  }
+  $('cnote').textContent = 'Выбрано: ' + mask + ' + ' + silk + '. Сочетания без контраста отключены: с них не прочитать QR.';
+}
+
+// ---------------------------------------------------------------- face of the tag, drawn on a canvas
+const K = 24, FW = 40, FH = 43.5;                       // px per mm; the board with its ear, mm
+const face = document.createElement('canvas'); face.width = FW * K; face.height = FH * K;
+const g = face.getContext('2d');
+const X = x => (x + 2.5) * K, Y = y => (y + 8.5) * K;    // board coordinates (mm, y down, 0 = top edge) -> canvas
+const QR = (() => {                                      // a stand-in pattern: the real code is made with the order
+  const n = 29, m = [], rnd = (s => () => (s = s * 16807 % 2147483647) / 2147483647)(7);
+  for (let j = 0; j < n; j++) { m.push([]); for (let i = 0; i < n; i++) m[j].push(rnd() > 0.52); }
+  for (const [a, b] of [[0, 0], [n - 7, 0], [0, n - 7]])
+    for (let j = -1; j < 8; j++) for (let i = -1; i < 8; i++) { const x = a + i, y = b + j; if (x < 0 || y < 0 || x >= n || y >= n) continue;
+      m[y][x] = i >= 0 && i < 7 && j >= 0 && j < 7 && (i === 0 || i === 6 || j === 0 || j === 6 || (i > 1 && i < 5 && j > 1 && j < 5)); }
+  return m;
+})();
+const tel = s => { const d = s.replace(/\D/g, ''); if (!d) return ''; if (d.length === 11 && '78'.includes(d[0])) return '+7' + d.slice(1); if (d.length === 10) return '+7' + d; return '+' + d; };
+function text(s, cx, base, cap, maxw, weight) {
+  let px = cap / 0.716 * K; g.font = (weight || 'bold') + ' ' + px + 'px Arial'; g.textAlign = 'center';
+  const w = g.measureText(s).width; if (w > maxw * K) { px *= maxw * K / w; g.font = (weight || 'bold') + ' ' + px + 'px Arial'; }
+  g.fillText(s, X(cx), Y(base));
+}
+function draw() {
+  const mc = MASKS[mask], sc = SILKS[silk], lightSilk = silk === 'White';
+  g.fillStyle = mc; g.fillRect(0, 0, face.width, face.height);
+  g.strokeStyle = 'rgba(' + (mask === 'White' || mask === 'Yellow' ? '0,0,0,.10' : '255,255,255,.07') + ')'; g.lineWidth = 0.25 * K;      // the antenna turns under the mask
+  for (let i = 0; i < 5; i++) { const d = 1.5 + i * 0.5; g.strokeRect(X(d - 0.1), Y(d - 1), (35.2 - 2 * d) * K, (36 - 2 * d) * K); }
+  const q0x = 6.5, q0y = 1.75, st = 22 / 33;
+  if (lightSilk) { g.fillStyle = sc; g.fillRect(X(q0x), Y(q0y), 22 * K, 22 * K); }
+  g.fillStyle = lightSilk ? mc : sc;
+  for (let j = 0; j < 29; j++) for (let i = 0; i < 29; i++) if (QR[j][i]) g.fillRect(X(q0x + (i + 2) * st) - 0.5, Y(q0y + (j + 2) * st) - 0.5, st * K + 1, st * K + 1);
+  g.fillStyle = sc;
+  text(($('name').value.trim() || 'КЛИЧКА').toUpperCase(), 17.5, 26.7, 2.6, 22);
+  text([tel($('p0').value), tel($('p1').value)].filter(Boolean).join('    ') || '+7 000 000-00-00', 17.5, 34.2, 1.0, 26);
+  text('NFC', 8.8, 30.75, 1.1, 5); text('Charge', 17.5, 32.3, 0.85, 6);
+  for (const x of [-1, 36]) for (const [y, c] of [[7.9, x < 0 ? '#ff6b60' : '#6aa5ff'], [14.3, '#fffbe6'], [20.7, '#fffbe6'], [27, '#fffbe6']]) {
+    g.fillStyle = '#c9c9c9'; g.fillRect(X(x - 0.45), Y(y - 0.85), 0.9 * K, 1.7 * K); g.fillStyle = c; g.fillRect(X(x - 0.4), Y(y - 0.55), 0.8 * K, 1.1 * K); }
+  g.fillStyle = '#fffbe6'; g.fillRect(X(16.7), Y(30.0), 1.6 * K, 0.8 * K);
+  g.fillStyle = '#d6b24a'; for (const x of [12.6, 22.4]) for (const y of [28.3, 31.0]) g.fillRect(X(x - 0.35), Y(y - 0.6), 0.7 * K, 1.2 * K);
+  for (const [x, y] of [[0, 2.5], [35, 2.5], [0, 32.5], [35, 32.5]]) {                                    // screw heads
+    g.fillStyle = '#b9bcc0'; g.beginPath(); g.arc(X(x), Y(y), 1.8 * K, 0, 7); g.fill();
+    g.strokeStyle = '#6d7075'; g.lineWidth = 0.3 * K; g.beginPath(); g.moveTo(X(x - 1), Y(y)); g.lineTo(X(x + 1), Y(y)); g.moveTo(X(x), Y(y - 1)); g.lineTo(X(x), Y(y + 1)); g.stroke(); }
+  if (tex) { tex.needsUpdate = true; boardMat.roughness = mask.startsWith('Matte') ? 0.9 : 0.35; boardSide.color.set(mc); }
+}
+
+// ---------------------------------------------------------------- 3D scene: the tag on a collar
+let tex, boardMat, boardSide;
+(function scene() {
+  if (!window.THREE) { $('view').style.display = 'none'; return; }
+  const el = $('view'), r = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  r.setPixelRatio(Math.min(devicePixelRatio, 2)); r.outputEncoding = THREE.sRGBEncoding; el.prepend(r.domElement);
+  const sc = new THREE.Scene(), cam = new THREE.PerspectiveCamera(32, 1, 1, 2000);
+  cam.position.set(42, 34, 175);
+  const ctl = new THREE.OrbitControls(cam, r.domElement); ctl.target.set(0, 16, -5); ctl.enableDamping = true; ctl.enablePan = false; ctl.minDistance = 90; ctl.maxDistance = 420;
+  sc.add(new THREE.HemisphereLight(0xffffff, 0x9a9a9a, 0.95));
+  const sun = new THREE.DirectionalLight(0xffffff, 0.75); sun.position.set(80, 160, 220); sc.add(sun);
+
+  const outline = (grow) => { const s = new THREE.Shape(), w = 20 + grow, h = 17.5 + grow, c = 2.5 + grow, er = 5 + grow, ex = Math.sqrt(er * er - 3.5 * 3.5), a = Math.atan2(3.5, ex);
+    s.moveTo(-w + c, -h); s.lineTo(w - c, -h); s.absarc(w - c, -h + c, c, -Math.PI / 2, 0); s.lineTo(w, h - c); s.absarc(w - c, h - c, c, 0, Math.PI / 2);
+    s.lineTo(ex, h); s.absarc(0, 21, er, -a, Math.PI + a); s.lineTo(-w + c, h); s.absarc(-w + c, h - c, c, Math.PI / 2, Math.PI); s.lineTo(-w, -h + c); s.absarc(-w + c, -h + c, c, Math.PI, Math.PI * 1.5);
+    const hole = new THREE.Path(); hole.absarc(0, 21, 1.6, 0, Math.PI * 2, true); s.holes.push(hole); return s; };
+  tex = new THREE.CanvasTexture(face); tex.encoding = THREE.sRGBEncoding; tex.minFilter = THREE.LinearFilter; tex.generateMipmaps = false;       // the canvas is not a power of two: with mipmaps it comes out white
+  tex.repeat.set(1 / FW, 1 / FH); tex.offset.set(0.5, 17.5 / FH);                       // shape millimetres -> canvas
+  boardMat = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.35, metalness: 0.05 });
+  boardSide = new THREE.MeshStandardMaterial({ color: 0x141414, roughness: 0.6 });
+  const plastic = new THREE.MeshStandardMaterial({ color: 0x2b2d30, roughness: 0.75 });
+  const tag = new THREE.Group();
+  const board = new THREE.Mesh(new THREE.ExtrudeGeometry(outline(0), { depth: 1.6, bevelEnabled: false, curveSegments: 24 }), [boardMat, boardSide]);
+  tag.add(board);
+  const body = new THREE.Shape(); { const w = 19.95, h = 17.45, c = 2.45; body.moveTo(-w + c, -h); body.lineTo(w - c, -h); body.absarc(w - c, -h + c, c, -Math.PI / 2, 0); body.lineTo(w, h - c);
+    body.absarc(w - c, h - c, c, 0, Math.PI / 2); body.lineTo(-w + c, h); body.absarc(-w + c, h - c, c, Math.PI / 2, Math.PI); body.lineTo(-w, -h + c); body.absarc(-w + c, -h + c, c, Math.PI, Math.PI * 1.5); }
+  const tray = new THREE.Mesh(new THREE.ExtrudeGeometry(body, { depth: 10.6, bevelEnabled: false, curveSegments: 16 }), plastic); tray.position.z = -10.6; tag.add(tray);
+  const ear = new THREE.Mesh(new THREE.ExtrudeGeometry(outline(-0.05), { depth: 3, bevelEnabled: false, curveSegments: 24 }), plastic); ear.position.z = -3; tag.add(ear);
+  const steel = new THREE.MeshStandardMaterial({ color: 0xc9ccd1, roughness: 0.25, metalness: 0.9 });
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(7, 0.65, 12, 48), steel); ring.rotation.y = Math.PI / 2; ring.position.set(0, 27.2, -0.7); tag.add(ring);
+  tag.rotation.set(0.05, -0.18, 0.06); sc.add(tag);
+
+  const dring = new THREE.Mesh(new THREE.TorusGeometry(6.5, 0.9, 12, 48), steel); dring.position.set(0, 39.5, -0.7); dring.scale.y = 0.85; sc.add(dring);
+  const strapTex = (() => { const c = document.createElement('canvas'); c.width = 512; c.height = 64; const x = c.getContext('2d'); x.fillStyle = '#e8851a'; x.fillRect(0, 0, 512, 64);
+    x.strokeStyle = 'rgba(0,0,0,.22)'; x.lineWidth = 2; for (let i = -64; i < 512; i += 6) { x.beginPath(); x.moveTo(i, 64); x.lineTo(i + 40, 0); x.stroke(); }
+    x.fillStyle = 'rgba(0,0,0,.18)'; x.fillRect(0, 0, 512, 5); x.fillRect(0, 59, 512, 5);
+    const t = new THREE.CanvasTexture(c); t.wrapS = THREE.RepeatWrapping; t.repeat.set(6, 1); t.encoding = THREE.sRGBEncoding; return t; })();
+  const R = 58, strap = new THREE.Mesh(new THREE.CylinderGeometry(R, R, 18, 96, 1, true), new THREE.MeshStandardMaterial({ map: strapTex, roughness: 0.9, side: THREE.DoubleSide }));
+  strap.position.set(0, 53, -R - 1.2); sc.add(strap);
+  const black = new THREE.MeshStandardMaterial({ color: 0x151515, roughness: 0.6 });
+  for (const a of [-0.22, 0.22, 2.2]) { const k = new THREE.Mesh(new THREE.BoxGeometry(a > 1 ? 16 : 5, 21, 4.5), black); k.position.set(Math.sin(a) * R, 53, -R - 1.2 + Math.cos(a) * R); k.rotation.y = a; sc.add(k); }
+
+  const fit = () => { const w = el.clientWidth, h = el.clientHeight; r.setSize(w, h, false); cam.aspect = w / h; cam.updateProjectionMatrix(); };
+  new ResizeObserver(fit).observe(el); fit();
+  window.scene3d = { r, sc, cam };
+  (function loop() { requestAnimationFrame(loop); ctl.update(); r.render(sc, cam); })();
+})();
+chips(); draw();
+ids.forEach(i => $(i).addEventListener('input', () => { save(); draw(); }));
+
+// ---------------------------------------------------------------- photo, checks, the file
 $('photo').onchange = () => {
   const f = $('photo').files[0]; photo = '';
   if (!f) return;
@@ -95,7 +235,6 @@ $('photo').onchange = () => {
   img.onerror = () => { $('err').textContent = 'Не получилось открыть фото. Попробуйте JPG или PNG.'; };
   img.src = URL.createObjectURL(f);
 };
-
 const digits = s => s.replace(/\D/g, '');
 function check() {
   if (!$('name').value.trim()) return 'Укажите кличку';
@@ -108,14 +247,14 @@ function check() {
 }
 $('go').onclick = () => {
   const e = check(); $('err').textContent = e; if (e) return;
-  const data = { adresnik: 1, name: $('name').value.trim(), gender: $('gender').value,
+  const data = { adresnik: 1, name: $('name').value.trim(), gender: $('gender').value, mask, silk,
     owners: [0, 1].map(i => ({ label: $('l' + i).value.trim(), phone: $('p' + i).value.trim(), email: $('e' + i).value.trim(), telegram: $('t' + i).value.trim() })),
     consent: new Date().toISOString(), photo: { name: 'photo.jpg', data: photo } };
   const name = 'adresnik-' + (data.name.toLowerCase().replace(/[^a-zа-яё0-9]+/gi, '-') || 'pet') + '.txt';
   file = new File([JSON.stringify(data)], name, { type: 'text/plain' });
   $('fn').textContent = name; $('dl').href = URL.createObjectURL(file); $('dl').download = name;
   $('share').style.display = (navigator.canShare && navigator.canShare({ files: [file] })) ? 'block' : 'none';
-  $('form').style.display = 'none'; $('done').style.display = 'block'; scrollTo(0, 0);
+  $('form').style.display = 'none'; $('done').style.display = 'block'; $('side').scrollTo(0, 0);
 };
 $('share').onclick = async () => { try { await navigator.share({ files: [file], title: 'Анкета для адресника' }); } catch (e) {} };
 $('back').onclick = () => { $('done').style.display = 'none'; $('form').style.display = 'block'; };
